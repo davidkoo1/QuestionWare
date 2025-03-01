@@ -4,8 +4,8 @@ namespace QuestionWare.Quiz.Domain.Models
 {
     public class Quiz : AuditableEntity
     {
-        public string Name { get; set; }
-        public int TimeForQuiz { get; set; }
+        public required string Name { get; set; }
+        public required int TimeForQuiz { get; set; }
         public string Description { get; set; }
     }
 }
