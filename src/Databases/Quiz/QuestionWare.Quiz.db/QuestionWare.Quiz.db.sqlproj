@@ -59,5 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Quiz.sql" />
+    <Build Include="Question.sql" />
+    <Build Include="AnswerOption.sql" />
+    <Build Include="Result.sql" />
+    <Build Include="Temp.sql" />
   </ItemGroup>
 </Project>
