@@ -6,4 +6,8 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Domain\QuestionWare.Quiz.Domain\QuestionWare.Quiz.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
