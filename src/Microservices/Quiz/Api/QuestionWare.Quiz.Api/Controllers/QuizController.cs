@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using QuestionWare.Quiz.Application.Commands.Quiz;
+using QuestionWare.Quiz.Application.DTOs;
 using QuestionWare.Quiz.Application.Queries.Quiz;
 
 namespace QuestionWare.Quiz.Api.Controllers
@@ -17,23 +18,38 @@ namespace QuestionWare.Quiz.Api.Controllers
         }
 
 
-        [HttpGet("all")] 
-        public async Task<ActionResult<IEnumerable<QuestionWare.Quiz.Domain.Models.Quiz>>> GetAllQuizzes()
+        [HttpGet]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<QuizDto>))]
+        public async Task<ActionResult<IEnumerable<QuizDto>>> GetAllQuizzes()
         {
-            var quizzes = await _mediator.Send(new GetAllQuizzesQuery());
+            GetAllQuizzesQuery query = new GetAllQuizzesQuery();
+            IEnumerable<QuizDto> quizzes = await _mediator.Send(query);
             return Ok(quizzes);
         }
+        //Get by Id with fulldatail and for partialView
 
-
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateQuiz([FromBody] CreateQuizCommand command)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<QuizDto>> GetQuizById(int id)
         {
-            bool success = await _mediator.Send(command);
+            var quiz = await _mediator.Send(new GetQuizByIdQuery(id));
+            return quiz is not null ? Ok(quiz) : NotFound();
+        }
 
-            if (success)
-                return Ok(new { Message = "Quiz created successfully!" });
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] QuizDto quizDto)
+        {
+            var command = new CreateQuizCommand(quizDto);
+            int newQuizId = await _mediator.Send(command);
 
-            return BadRequest(new { Error = "Failed to create quiz." });
+            if (newQuizId <= 0)
+                return BadRequest(new { Error = "Failed to create quiz." });
+
+            var newQuiz = new QuizDto(newQuizId, quizDto.Name, quizDto.TimeForQuiz, quizDto.Description);
+
+            return CreatedAtAction(nameof(GetQuizById), new { id = newQuizId }, newQuiz);
         }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using Dapper;
 using MediatR;
+using QuestionWare.Quiz.Application.DTOs;
 using System.Data;
 
 namespace QuestionWare.Quiz.Application.Commands.Quiz
 {
-    public record CreateQuizCommand(string Name, int TimeForQuiz, string Description) : IRequest<bool>;
+    public record CreateQuizCommand(QuizDto quiz) : IRequest<int>;
 
-    public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, bool>
+    public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, int>
     {
         private readonly IDbConnection _dbConnection;
 
@@ -15,18 +16,20 @@ namespace QuestionWare.Quiz.Application.Commands.Quiz
             _dbConnection = dbConnection;
         }
 
-        public async Task<bool> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
         {
-            const string sql = "INSERT INTO Quiz (Name, TimeForQuiz, Description) VALUES (@Name, @TimeForQuiz, @Description)";
+            const string sql = "INSERT INTO Quiz (Name, TimeForQuiz, Description)" +
+                "VALUES (@Name, @TimeForQuiz, @Description)" +
+                "SELECT CAST(SCOPE_IDENTITY() as int)";
 
-            var rowsAffected = await _dbConnection.ExecuteAsync(sql, new
+            var newId = await _dbConnection.QuerySingleAsync<int>(sql, new
             {
-                Name = request.Name,
-                TimeForQuiz = request.TimeForQuiz,
-                Description = request.Description
+                Name = request.quiz.Name,
+                TimeForQuiz = request.quiz.TimeForQuiz,
+                Description = request.quiz.Description
             });
 
-            return rowsAffected > 0;
+            return newId;
         }
     }
 }
