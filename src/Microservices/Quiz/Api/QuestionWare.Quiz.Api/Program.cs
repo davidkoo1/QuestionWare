@@ -1,6 +1,9 @@
 using QuestionWare.Quiz.Infrastructure;
+using QuestionWare.Quiz.Application;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApplication();
 
 builder.Services.AddControllers();
 
